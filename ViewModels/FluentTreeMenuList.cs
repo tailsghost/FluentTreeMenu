@@ -28,7 +28,7 @@ public class FluentTreeMenuList : FluentTreeMenuBase
         set => SetValue(ref field, value);
     }
 
-    public FluentTreeMenuList(string header, SymbolRegular icon, bool isBlocked = false) : base(header, icon, isBlocked)
+    public FluentTreeMenuList(string header, SymbolRegular icon, bool isBlocked = false, bool isUnique = false) : base(header, icon, isBlocked, isUnique)
     {
         Children.CollectionChanged += Children_CollectionChanged;
     }

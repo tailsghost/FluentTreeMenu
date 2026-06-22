@@ -96,6 +96,8 @@ public abstract class FluentTreeMenuBase : BaseViewModel, IDisposable
         set => SetValue(ref field, value);
     }
 
+    public bool IsUnique { get; }
+
     public bool IsBlocked { get; }
 
     public bool IsEnable
@@ -125,12 +127,13 @@ public abstract class FluentTreeMenuBase : BaseViewModel, IDisposable
     public bool HasCommands => Commands.Count > 0;
 
     public override string ToString() => Header;
-    protected FluentTreeMenuBase(string header, SymbolRegular icon, bool isBlocked = false)
+    protected FluentTreeMenuBase(string header, SymbolRegular icon, bool isBlocked = false, bool isUnique = false)
     {
         Header = header;
         Icon = icon;
         IsBlocked = isBlocked;
         Commands.CollectionChanged += Commands_CollectionChanged;
+        IsUnique = isUnique;
     }
 
     public void UpdateTitle(string newTitle)

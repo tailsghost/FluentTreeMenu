@@ -5,7 +5,7 @@ namespace FluentTreeMenu.ViewModels;
 
 public class FluentTreeMenuItem : FluentTreeMenuBase
 {
-    public FluentTreeMenuItem(string header, SymbolRegular icon, bool isBlocked = false) : base(header, icon, isBlocked)
+    public FluentTreeMenuItem(string header, SymbolRegular icon, bool isBlocked = false, bool isUnique = false) : base(header, icon, isBlocked, isUnique)
     {
     }
 
