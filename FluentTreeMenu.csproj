@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net10.0-windows</TargetFramework>
@@ -7,13 +7,13 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
-  <ItemGroup>
+  <!--<ItemGroup>
     <PackageReference Include="WPF-UI" Version="4.3.0" />
-  </ItemGroup>
+  </ItemGroup>-->
 
   <ItemGroup>
-    <Folder Include="Models\" />
-    <Folder Include="ViewModels\" />
+    <ProjectReference Include="..\BaseChromeWindow\BaseChromeWindow.csproj" />
+    <ProjectReference Include="..\FBDEditor\wpfui\src\Wpf.Ui\Wpf.Ui.csproj" />
   </ItemGroup>
 
 </Project>

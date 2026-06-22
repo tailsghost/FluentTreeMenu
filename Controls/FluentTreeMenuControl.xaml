@@ -1,12 +1,545 @@
-﻿<UserControl x:Class="FluentTreeMenu.Controls.FluentTreeMenuControl"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:local="clr-namespace:FluentTreeMenu.Controls"
-             mc:Ignorable="d"
-             d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
+﻿<UserControl
+    x:Class="FluentTreeMenu.Controls.FluentTreeMenuControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:converts="clr-namespace:FluentTreeMenu.Converts"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:FluentTreeMenu.Controls"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:models="clr-namespace:FluentTreeMenu.ViewModels"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <converts:ConnectorLineHeightConverter x:Key="ConnectorLineHeightConverter" />
+            <converts:FluentTreeMenuItemElementConverter x:Key="FluentTreeMenuItemElementConverter" />
+            <converts:FolderConnectorLineHeightConverter x:Key="FolderConnectorLineHeightConverter" />
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <Border
+        Background="{Binding Background, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+        BorderBrush="{Binding BorderBrush, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+        BorderThickness="{Binding BorderThickness, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+        SnapsToDevicePixels="True"
+        UseLayoutRounding="True">
+        <ScrollViewer
+            x:Name="ScrollViewer"
+            CanContentScroll="False"
+            HorizontalScrollBarVisibility="Auto"
+            VerticalScrollBarVisibility="Auto">
+            <Grid SnapsToDevicePixels="True" UseLayoutRounding="True">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="32" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
 
-    </Grid>
+                <Border
+                    Grid.Row="0"
+                    Background="{ui:ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    SnapsToDevicePixels="True"
+                    UseLayoutRounding="True">
+                    <ItemsControl
+                        HorizontalAlignment="Stretch"
+                        ItemsSource="{Binding ViewModel.Columns, RelativeSource={RelativeSource AncestorType={x:Type local:FluentTreeMenuControl}}}"
+                        SnapsToDevicePixels="True"
+                        UseLayoutRounding="True">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border
+                                    x:Name="CellBorder"
+                                    Width="{Binding ActualWidth}"
+                                    MinHeight="32"
+                                    Background="{ui:ThemeResource SmokeFillColorDefaultBrush}"
+                                    BorderBrush="{ui:ThemeResource ControlStrokeColorDefaultBrush}"
+                                    BorderThickness="0,1,0,1"
+                                    SnapsToDevicePixels="True"
+                                    UseLayoutRounding="True">
+                                    <Grid SnapsToDevicePixels="True" UseLayoutRounding="True">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="4" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <TextBlock
+                                            Grid.Column="0"
+                                            Margin="10,0,8,0"
+                                            VerticalAlignment="Center"
+                                            FontWeight="SemiBold"
+                                            Foreground="{ui:ThemeResource TextFillColorPrimaryBrush}"
+                                            Text="{Binding Header}"
+                                            TextTrimming="CharacterEllipsis">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Grid.ColumnSpan" Value="1" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsLast}" Value="True">
+                                                            <Setter Property="Grid.ColumnSpan" Value="2" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+
+                                        <Thumb
+                                            Grid.Column="1"
+                                            Width="3"
+                                            Margin="2,0,-2,0"
+                                            HorizontalAlignment="Stretch"
+                                            VerticalAlignment="Stretch"
+                                            Cursor="SizeWE"
+                                            DragDelta="ColumnResizeThumb_DragDelta"
+                                            Focusable="False">
+                                            <Thumb.Style>
+                                                <Style TargetType="Thumb">
+                                                    <Setter Property="Visibility" Value="Visible" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsLast}" Value="True">
+                                                            <Setter Property="Visibility" Value="Collapsed" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Thumb.Style>
+                                            <Thumb.Template>
+                                                <ControlTemplate TargetType="{x:Type Thumb}">
+                                                    <Grid Background="Transparent">
+                                                        <Rectangle
+                                                            Width="4"
+                                                            HorizontalAlignment="Center"
+                                                            VerticalAlignment="Stretch"
+                                                            Fill="{ui:ThemeResource ControlStrokeColorDefaultBrush}" />
+                                                    </Grid>
+                                                </ControlTemplate>
+                                            </Thumb.Template>
+                                        </Thumb>
+                                    </Grid>
+                                </Border>
+                                <DataTemplate.Triggers>
+                                    <DataTrigger Binding="{Binding IsMainColumn}" Value="True">
+                                        <Setter TargetName="CellBorder" Property="BorderThickness" Value="1" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding CanResize}" Value="False">
+                                        <Setter TargetName="CellBorder" Property="BorderThickness" Value="0,1,0,1" />
+                                    </DataTrigger>
+                                </DataTemplate.Triggers>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Border>
+
+                <TreeView
+                    x:Name="PART_TreeView"
+                    Grid.Row="1"
+                    Background="Transparent"
+                    BorderThickness="0"
+                    FontSize="{Binding FontSize, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                    Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                    ItemsSource="{Binding ViewModel.Collections, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                    ScrollViewer.CanContentScroll="False"
+                    ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                    ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                    SelectedItemChanged="PART_TreeView_OnSelectedItemChanged"
+                    VirtualizingStackPanel.IsVirtualizing="False"
+                    VirtualizingStackPanel.VirtualizationMode="Standard">
+
+                    <TreeView.Resources>
+                        <DataTemplate x:Key="FluentTreeMenuRowTemplate">
+                            <ItemsControl
+                                HorizontalAlignment="Stretch"
+                                ItemsSource="{Binding ViewModel.Columns, RelativeSource={RelativeSource AncestorType={x:Type local:FluentTreeMenuControl}}}"
+                                SnapsToDevicePixels="True"
+                                UseLayoutRounding="True">
+
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Horizontal" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border
+                                            x:Name="CellBorder"
+                                            Width="{Binding ActualWidth}"
+                                            Height="32"
+                                            Background="Transparent"
+                                            BorderBrush="{ui:ThemeResource ControlStrokeColorDefaultBrush}"
+                                            SnapsToDevicePixels="True"
+                                            UseLayoutRounding="True">
+                                            <Grid SnapsToDevicePixels="True" UseLayoutRounding="True">
+                                                <Grid x:Name="MainColumnPanel" Visibility="Collapsed">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto" />
+                                                        <ColumnDefinition Width="16" />
+                                                        <ColumnDefinition Width="Auto" />
+                                                        <ColumnDefinition Width="25" />
+                                                        <ColumnDefinition Width="*" />
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <ItemsControl
+                                                        Grid.Column="0"
+                                                        HorizontalAlignment="Left"
+                                                        AlternationCount="32"
+                                                        ItemsSource="{Binding DataContext.ConnectorPath, RelativeSource={RelativeSource AncestorType=TreeViewItem}}"
+                                                        SnapsToDevicePixels="True"
+                                                        UseLayoutRounding="True">
+                                                        <ItemsControl.ItemsPanel>
+                                                            <ItemsPanelTemplate>
+                                                                <StackPanel Orientation="Horizontal" />
+                                                            </ItemsPanelTemplate>
+                                                        </ItemsControl.ItemsPanel>
+                                                        <ItemsControl.ItemTemplate>
+                                                            <DataTemplate>
+                                                                <Grid
+                                                                    Width="20"
+                                                                    Height="32"
+                                                                    SnapsToDevicePixels="True"
+                                                                    UseLayoutRounding="True">
+                                                                    <Border
+                                                                        Width="1"
+                                                                        Margin="-3,0,0,0"
+                                                                        HorizontalAlignment="Center"
+                                                                        VerticalAlignment="Top"
+                                                                        Background="{ui:ThemeResource ControlStrokeColorDefaultBrush}">
+                                                                        <Border.Height>
+                                                                            <MultiBinding Converter="{StaticResource ConnectorLineHeightConverter}" ConverterParameter="32">
+                                                                                <Binding />
+                                                                                <Binding Path="(ItemsControl.AlternationIndex)" RelativeSource="{RelativeSource AncestorType=ContentPresenter}" />
+                                                                                <Binding Path="Items.Count" RelativeSource="{RelativeSource AncestorType=ItemsControl}" />
+                                                                                <Binding Path="DataContext.IsLast" RelativeSource="{RelativeSource AncestorType=TreeViewItem}" />
+                                                                                <Binding Path="DataContext.HasChildren" RelativeSource="{RelativeSource AncestorType=TreeViewItem}" />
+                                                                                <Binding Path="IsExpanded" RelativeSource="{RelativeSource AncestorType=TreeViewItem}" />
+                                                                            </MultiBinding>
+                                                                        </Border.Height>
+                                                                    </Border>
+                                                                </Grid>
+                                                            </DataTemplate>
+                                                        </ItemsControl.ItemTemplate>
+                                                    </ItemsControl>
+
+                                                    <Grid
+                                                        Grid.Column="1"
+                                                        Width="16"
+                                                        Height="32">
+                                                        <Border
+                                                            Width="1"
+                                                            HorizontalAlignment="Center"
+                                                            VerticalAlignment="Top"
+                                                            Background="{ui:ThemeResource ControlStrokeColorDefaultBrush}">
+                                                            <Border.Height>
+                                                                <MultiBinding Converter="{StaticResource FolderConnectorLineHeightConverter}" ConverterParameter="32">
+                                                                    <Binding Path="DataContext.HasParent" RelativeSource="{RelativeSource AncestorType=TreeViewItem}" />
+                                                                    <Binding Path="(ItemsControl.AlternationIndex)" RelativeSource="{RelativeSource AncestorType=ContentPresenter}" />
+                                                                    <Binding Path="Items.Count" RelativeSource="{RelativeSource AncestorType=ItemsControl}" />
+                                                                    <Binding Path="DataContext.IsLast" RelativeSource="{RelativeSource AncestorType=TreeViewItem}" />
+                                                                </MultiBinding>
+                                                            </Border.Height>
+                                                            <Border.Visibility>
+                                                                <Binding Path="DataContext.Parent.IsExpanded" RelativeSource="{RelativeSource AncestorType=TreeViewItem}">
+                                                                    <Binding.Converter>
+                                                                        <BooleanToVisibilityConverter />
+                                                                    </Binding.Converter>
+                                                                </Binding>
+                                                            </Border.Visibility>
+                                                        </Border>
+
+                                                        <ToggleButton
+                                                            HorizontalAlignment="Center"
+                                                            VerticalAlignment="Center"
+                                                            Panel.ZIndex="3"
+                                                            IsChecked="{Binding IsExpanded, RelativeSource={RelativeSource AncestorType=TreeViewItem}, Mode=TwoWay}">
+                                                            <ToggleButton.Style>
+                                                                <Style TargetType="ToggleButton">
+                                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding DataContext.HasChildren, RelativeSource={RelativeSource AncestorType=TreeViewItem}}" Value="True">
+                                                                            <Setter Property="Visibility" Value="Visible" />
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </ToggleButton.Style>
+                                                            <ToggleButton.Template>
+                                                                <ControlTemplate TargetType="{x:Type ToggleButton}">
+                                                                    <Border
+                                                                        Width="14"
+                                                                        Height="14"
+                                                                        Background="Transparent"
+                                                                        BorderBrush="{ui:ThemeResource ControlStrokeColorDefaultBrush}"
+                                                                        BorderThickness="1"
+                                                                        CornerRadius="1"
+                                                                        SnapsToDevicePixels="True"
+                                                                        UseLayoutRounding="True">
+                                                                        <Grid SnapsToDevicePixels="True" UseLayoutRounding="True">
+                                                                            <Rectangle
+                                                                                x:Name="Horizontal"
+                                                                                Width="8"
+                                                                                Height="1"
+                                                                                HorizontalAlignment="Center"
+                                                                                VerticalAlignment="Center"
+                                                                                Fill="{ui:ThemeResource TextFillColorPrimaryBrush}" />
+                                                                            <Rectangle
+                                                                                x:Name="Vertical"
+                                                                                Width="1"
+                                                                                Height="8"
+                                                                                HorizontalAlignment="Center"
+                                                                                VerticalAlignment="Center"
+                                                                                Fill="{ui:ThemeResource TextFillColorPrimaryBrush}" />
+                                                                        </Grid>
+                                                                    </Border>
+                                                                    <ControlTemplate.Triggers>
+                                                                        <Trigger Property="IsChecked" Value="True">
+                                                                            <Setter TargetName="Vertical" Property="Visibility" Value="Collapsed" />
+                                                                        </Trigger>
+                                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                                            <Setter Property="BorderBrush" Value="{ui:ThemeResource TextFillColorPrimaryBrush}" />
+                                                                        </Trigger>
+                                                                        <Trigger Property="IsEnabled" Value="False">
+                                                                            <Setter Property="Opacity" Value="0.45" />
+                                                                        </Trigger>
+                                                                    </ControlTemplate.Triggers>
+                                                                </ControlTemplate>
+                                                            </ToggleButton.Template>
+                                                        </ToggleButton>
+                                                    </Grid>
+
+                                                    <Border
+                                                        Grid.Column="1"
+                                                        Grid.ColumnSpan="2"
+                                                        Width="{Binding DataContext.ConnectorLineLength, RelativeSource={RelativeSource AncestorType=TreeViewItem}}"
+                                                        Height="1"
+                                                        Margin="3,0,-3,0"
+                                                        HorizontalAlignment="Right"
+                                                        VerticalAlignment="Center"
+                                                        Background="{ui:ThemeResource ControlStrokeColorDefaultBrush}">
+                                                        <Border.Visibility>
+                                                            <Binding Path="DataContext.HasParent" RelativeSource="{RelativeSource AncestorType=TreeViewItem}">
+                                                                <Binding.Converter>
+                                                                    <BooleanToVisibilityConverter />
+                                                                </Binding.Converter>
+                                                            </Binding>
+                                                        </Border.Visibility>
+                                                    </Border>
+
+                                                    <ui:SymbolIcon
+                                                        Grid.Column="3"
+                                                        Width="16"
+                                                        Height="16"
+                                                        Margin="2,0,2,0"
+                                                        VerticalAlignment="Center"
+                                                        Symbol="{Binding DataContext.Icon, RelativeSource={RelativeSource AncestorType=TreeViewItem}}" />
+
+                                                    <Border
+                                                        x:Name="UiElement"
+                                                        Grid.Column="4"
+                                                        BorderBrush="{ui:ThemeResource ControlStrokeColorDefaultBrush}"
+                                                        BorderThickness="1"
+                                                        Cursor="Hand"
+                                                        MouseLeftButtonDown="UIElement_OnMouseLeftButtonDown"
+                                                        MouseLeftButtonUp="UIElement_OnMouseLeftButtonUp"
+                                                        MouseMove="UIElement_OnMouseMove"
+                                                        MouseRightButtonDown="UIElement_OnMouseRightButtonDown"
+                                                        SnapsToDevicePixels="True"
+                                                        Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=TreeViewItem}}"
+                                                        UseLayoutRounding="True">
+                                                        <Border.Style>
+                                                            <Style TargetType="Border">
+                                                                <Setter Property="Background" Value="Transparent" />
+                                                                <Setter Property="Opacity" Value="1" />
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding DataContext.IsPlaceHolder, RelativeSource={RelativeSource AncestorType=TreeViewItem}}" Value="True">
+                                                                        <Setter Property="Background" Value="{DynamicResource SolidBackgroundFillColorMainAppBrush}" />
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding DataContext.IsBlockedItem, RelativeSource={RelativeSource AncestorType=TreeViewItem}}" Value="True">
+                                                                        <Setter Property="Opacity" Value="0.55" />
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Border.Style>
+                                                        <Grid SnapsToDevicePixels="True" UseLayoutRounding="True">
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="*" />
+                                                                <ColumnDefinition Width="Auto" />
+                                                            </Grid.ColumnDefinitions>
+
+                                                            <ContentControl
+                                                                Grid.Column="0"
+                                                                Padding="5,0,5,0"
+                                                                VerticalAlignment="Center"
+                                                                ContentTemplateSelector="{Binding ItemElementTemplateSelector, RelativeSource={RelativeSource AncestorType={x:Type local:FluentTreeMenuControl}}}"
+                                                                MouseMove="Fluent_OnMouseMove"
+                                                                PreviewMouseRightButtonDown="UIElement_OnPreviewMouseLeftButtonDown"
+                                                                Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=TreeViewItem}}">
+                                                                <ContentControl.Style>
+                                                                    <Style TargetType="ContentControl">
+                                                                        <Setter Property="IsEnabled" Value="{Binding DataContext.IsEnable, RelativeSource={RelativeSource AncestorType=TreeViewItem}}" />
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Binding="{Binding DataContext.IsBlockedItem, RelativeSource={RelativeSource AncestorType=TreeViewItem}}" Value="True">
+                                                                                <Setter Property="IsEnabled" Value="False" />
+                                                                                <Setter Property="Opacity" Value="0.55" />
+                                                                            </DataTrigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </ContentControl.Style>
+                                                                <ContentControl.Content>
+                                                                    <MultiBinding Converter="{StaticResource FluentTreeMenuItemElementConverter}">
+                                                                        <Binding Path="DataContext" RelativeSource="{RelativeSource AncestorType=TreeViewItem}" />
+                                                                        <Binding Path="BindingPath" />
+                                                                    </MultiBinding>
+                                                                </ContentControl.Content>
+                                                            </ContentControl>
+
+                                                            <ui:SymbolIcon
+                                                                Grid.Column="1"
+                                                                Width="22"
+                                                                Height="22"
+                                                                Cursor="Hand"
+                                                                PreviewMouseLeftButtonDown="UIElement_OnPreviewMouseLeftButtonDown"
+                                                                Symbol="Settings24"
+                                                                Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=TreeViewItem}}"
+                                                                Visibility="{Binding DataContext.HasCommands, RelativeSource={RelativeSource AncestorType=TreeViewItem}, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                                <ui:SymbolIcon.Style>
+                                                                    <Style TargetType="ui:SymbolIcon">
+                                                                        <Setter Property="IsEnabled" Value="{Binding DataContext.IsEnable, RelativeSource={RelativeSource AncestorType=TreeViewItem}}" />
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Binding="{Binding DataContext.IsBlockedItem, RelativeSource={RelativeSource AncestorType=TreeViewItem}}" Value="True">
+                                                                                <Setter Property="IsEnabled" Value="False" />
+                                                                                <Setter Property="Opacity" Value="0.55" />
+                                                                            </DataTrigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </ui:SymbolIcon.Style>
+                                                            </ui:SymbolIcon>
+                                                        </Grid>
+                                                    </Border>
+                                                </Grid>
+
+                                                <Grid x:Name="PlainColumnPanel">
+                                                    <ContentControl VerticalAlignment="Center" ContentTemplateSelector="{Binding ItemElementTemplateSelector, RelativeSource={RelativeSource AncestorType={x:Type local:FluentTreeMenuControl}}}">
+                                                        <ContentControl.Style>
+                                                            <Style TargetType="ContentControl">
+                                                                <Setter Property="IsEnabled" Value="{Binding DataContext.IsEnable, RelativeSource={RelativeSource AncestorType=TreeViewItem}}" />
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding DataContext.IsBlockedItem, RelativeSource={RelativeSource AncestorType=TreeViewItem}}" Value="True">
+                                                                        <Setter Property="IsEnabled" Value="False" />
+                                                                        <Setter Property="Opacity" Value="0.55" />
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </ContentControl.Style>
+                                                        <ContentControl.Content>
+                                                            <MultiBinding Converter="{StaticResource FluentTreeMenuItemElementConverter}">
+                                                                <Binding Path="DataContext" RelativeSource="{RelativeSource AncestorType=TreeViewItem}" />
+                                                                <Binding Path="BindingPath" />
+                                                            </MultiBinding>
+                                                        </ContentControl.Content>
+                                                    </ContentControl>
+                                                </Grid>
+                                            </Grid>
+                                        </Border>
+
+                                        <DataTemplate.Triggers>
+                                            <DataTrigger Binding="{Binding IsMainColumn}" Value="True">
+                                                <Setter TargetName="MainColumnPanel" Property="Visibility" Value="Visible" />
+                                                <Setter TargetName="PlainColumnPanel" Property="Visibility" Value="Collapsed" />
+                                                <Setter TargetName="CellBorder" Property="BorderThickness" Value="0,0,0,0" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding IsMainColumn}" Value="False">
+                                                <Setter TargetName="CellBorder" Property="BorderThickness" Value="0,0,1,1" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=TreeViewItem}, Path=IsSelected}" Value="True">
+                                                <Setter TargetName="CellBorder" Property="Background" Value="{ui:ThemeResource ControlAltFillColorQuarternaryBrush}" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=TreeViewItem}, Path=IsMouseOver}" Value="True">
+                                                <Setter TargetName="CellBorder" Property="Background" Value="{ui:ThemeResource ControlFillColorTertiaryBrush}" />
+                                            </DataTrigger>
+                                        </DataTemplate.Triggers>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </DataTemplate>
+
+                        <DataTemplate DataType="{x:Type models:FluentTreeMenuItem}">
+                            <ContentPresenter ContentTemplate="{StaticResource FluentTreeMenuRowTemplate}" DataContext="{Binding}" />
+                        </DataTemplate>
+                        <HierarchicalDataTemplate DataType="{x:Type models:FluentTreeMenuList}" ItemsSource="{Binding Children}">
+                            <ContentPresenter ContentTemplate="{StaticResource FluentTreeMenuRowTemplate}" DataContext="{Binding}" />
+                        </HierarchicalDataTemplate>
+
+                    </TreeView.Resources>
+
+                    <TreeView.ItemContainerStyle>
+                        <Style TargetType="{x:Type TreeViewItem}">
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                            <Setter Property="VerticalContentAlignment" Value="Center" />
+                            <Setter Property="Padding" Value="0" />
+                            <Setter Property="Margin" Value="0" />
+                            <Setter Property="BorderThickness" Value="0" />
+                            <Setter Property="Foreground" Value="{ui:ThemeResource TextFillColorPrimaryBrush}" />
+                            <Setter Property="Background" Value="Transparent" />
+                            <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
+                            <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
+                            <Setter Property="IsEnabled" Value="{Binding IsEnable}" />
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="{x:Type TreeViewItem}">
+                                        <Grid SnapsToDevicePixels="True" UseLayoutRounding="True">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
+                                            <Border
+                                                x:Name="HeaderBorder"
+                                                Padding="{TemplateBinding Padding}"
+                                                Background="{TemplateBinding Background}"
+                                                BorderBrush="{TemplateBinding BorderBrush}"
+                                                BorderThickness="{TemplateBinding BorderThickness}"
+                                                SnapsToDevicePixels="True"
+                                                UseLayoutRounding="True">
+                                                <ContentPresenter
+                                                    x:Name="HeaderSite"
+                                                    HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                    VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                    ContentSource="Header"
+                                                    SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                                            </Border>
+                                            <ItemsPresenter
+                                                x:Name="ItemsHost"
+                                                Grid.Row="1"
+                                                Margin="0" />
+                                        </Grid>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="HasItems" Value="False">
+                                                <Setter TargetName="ItemsHost" Property="Visibility" Value="Collapsed" />
+                                            </Trigger>
+                                            <Trigger Property="IsExpanded" Value="False">
+                                                <Setter TargetName="ItemsHost" Property="Visibility" Value="Collapsed" />
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                            <Style.Triggers>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter Property="Opacity" Value="0.5" />
+                                    <Setter Property="Foreground" Value="{ui:ThemeResource TextFillColorDisabledBrush}" />
+                                </Trigger>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="{ui:ThemeResource ControlFillColorSecondaryBrush}" />
+                                </Trigger>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter Property="Background" Value="{ui:ThemeResource ControlAltFillColorQuarternaryBrush}" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TreeView.ItemContainerStyle>
+                </TreeView>
+            </Grid>
+        </ScrollViewer>
+    </Border>
 </UserControl>
