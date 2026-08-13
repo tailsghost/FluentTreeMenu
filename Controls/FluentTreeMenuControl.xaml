@@ -234,7 +234,6 @@
                                                             Background="{ui:ThemeResource ControlStrokeColorDefaultBrush}">
                                                             <Border.Height>
                                                                 <MultiBinding Converter="{StaticResource FolderConnectorLineHeightConverter}" ConverterParameter="32">
-                                                                    <Binding Path="DataContext.HasParent" RelativeSource="{RelativeSource AncestorType=TreeViewItem}" />
                                                                     <Binding Path="(ItemsControl.AlternationIndex)" RelativeSource="{RelativeSource AncestorType=ContentPresenter}" />
                                                                     <Binding Path="Items.Count" RelativeSource="{RelativeSource AncestorType=ItemsControl}" />
                                                                     <Binding Path="DataContext.IsLast" RelativeSource="{RelativeSource AncestorType=TreeViewItem}" />
@@ -316,15 +315,7 @@
                                                         Margin="3,0,-3,0"
                                                         HorizontalAlignment="Right"
                                                         VerticalAlignment="Center"
-                                                        Background="{ui:ThemeResource ControlStrokeColorDefaultBrush}">
-                                                        <Border.Visibility>
-                                                            <Binding Path="DataContext.HasParent" RelativeSource="{RelativeSource AncestorType=TreeViewItem}">
-                                                                <Binding.Converter>
-                                                                    <BooleanToVisibilityConverter />
-                                                                </Binding.Converter>
-                                                            </Binding>
-                                                        </Border.Visibility>
-                                                    </Border>
+                                                        Background="{ui:ThemeResource ControlStrokeColorDefaultBrush}" />
 
                                                     <ui:SymbolIcon
                                                         Grid.Column="3"

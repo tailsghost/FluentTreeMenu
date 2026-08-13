@@ -16,8 +16,7 @@ public class FolderConnectorLineHeightConverter : IMultiValueConverter
 
         var halfRowHeight = rowHeight / 2d;
 
-        if (values[0] is not bool hasParent) return 0d;
-        if (values.Length > 3 && values[3] is bool and true)
+        if (values.Length > 2 && values[2] is bool and true)
             return halfRowHeight;
 
         return rowHeight;

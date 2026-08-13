@@ -67,6 +67,17 @@ public class FluentTreeMenuViewModel : BaseViewModel, IDisposable
         return null;
     }
 
+    public FluentTreeMenuBase FindRowToId(Guid id)
+    {
+        foreach (var row in Collections)
+        {
+            var find = FindRowToId(row, id);
+            if (find != null)
+                return find;
+        }
+        return null;
+    }
+
     public void Swap(FluentTreeMenuBase drag, FluentTreeMenuBase swapped, Dictionary<FluentTreeMenuBase, Rect> selections, bool result = true)
     {
         var parent = drag.Parent;
@@ -135,6 +146,17 @@ public class FluentTreeMenuViewModel : BaseViewModel, IDisposable
         foreach (var child in list.Children)
         {
             var find = FindRowToName(child, name);
+            if (find != null) return find;
+        }
+        return null;
+    }
+    private FluentTreeMenuBase FindRowToId(FluentTreeMenuBase row, Guid id)
+    {
+        if (row.Id == id) return row;
+        if (row is not FluentTreeMenuList list) return null;
+        foreach (var child in list.Children)
+        {
+            var find = FindRowToId(child, id);
             if (find != null) return find;
         }
         return null;

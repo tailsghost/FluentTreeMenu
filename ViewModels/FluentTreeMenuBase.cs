@@ -73,7 +73,7 @@ public abstract class FluentTreeMenuBase : BaseViewModel, IDisposable
         get => field;
         set => SetValue(ref field, value);
     }
-    public double ConnectorLineLength => HasParent ? _connectorWidth : 0d;
+    public double ConnectorLineLength => _connectorWidth;
 
     public bool HasParent => Parent != null;
 
@@ -150,8 +150,17 @@ public abstract class FluentTreeMenuBase : BaseViewModel, IDisposable
     public FluentTreeMenuItemElement? GetElement(string key)
         => ItemElements.FirstOrDefault(x => x.Key == key);
 
+    public void Rename(string text)
+    {
+        Header = text;
+        var element = ItemElements[0];
+        element.Text = text;
+    }
+
     public void SetElement(string key, FluentTreeMenuItemElement element, SymbolRegular? icon = null)
     {
+        if(element == null) 
+            return;
         var existing = GetElement(key);
         if (existing != null)
             ItemElements.Remove(existing);

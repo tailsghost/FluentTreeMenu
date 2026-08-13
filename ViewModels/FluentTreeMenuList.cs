@@ -10,12 +10,6 @@ public class FluentTreeMenuList : FluentTreeMenuBase
     public bool HasChildren 
         => Children.Count > 0;
 
-    public bool IsExpanded
-    {
-        get => field;
-        set => SetValue(ref field, value);
-    }
-
     public bool IsMovingChildren
     {
         get => field;
