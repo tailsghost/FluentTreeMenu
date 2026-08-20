@@ -12,7 +12,6 @@
   </ItemGroup>-->
 
   <ItemGroup>
-    <ProjectReference Include="..\BaseChromeWindow\BaseChromeWindow.csproj" />
     <ProjectReference Include="..\FBDEditor\wpfui\src\Wpf.Ui\Wpf.Ui.csproj" />
   </ItemGroup>
 

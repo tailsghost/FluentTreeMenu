@@ -387,6 +387,7 @@
 
                                                             <ui:SymbolIcon
                                                                 Grid.Column="1"
+                                                                Margin="0 0 10 0"
                                                                 Width="22"
                                                                 Height="22"
                                                                 Cursor="Hand"
