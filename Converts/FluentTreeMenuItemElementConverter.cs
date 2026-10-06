@@ -1,4 +1,5 @@
-﻿using FluentTreeMenu.ViewModels;
+﻿using System.Diagnostics;
+using FluentTreeMenu.ViewModels;
 using System.Globalization;
 using System.Windows.Data;
 
@@ -11,7 +12,9 @@ public class FluentTreeMenuItemElementConverter : IMultiValueConverter
         if (values.Length < 2 || values[0] is not FluentTreeMenuBase item || values[1] is not string key)
             return null!;
 
-        return item.GetElement(key);
+        var result = item.GetElement(key);
+        Debug.WriteLine($"[Converter] item={item.GetHashCode()} key={key} -> result={result?.GetHashCode()}");
+        return result;
     }
 
     public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)

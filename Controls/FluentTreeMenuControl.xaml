@@ -371,7 +371,6 @@
                                                                         <Setter Property="IsEnabled" Value="{Binding DataContext.IsEnable, RelativeSource={RelativeSource AncestorType=TreeViewItem}}" />
                                                                         <Style.Triggers>
                                                                             <DataTrigger Binding="{Binding DataContext.IsBlockedItem, RelativeSource={RelativeSource AncestorType=TreeViewItem}}" Value="True">
-                                                                                <Setter Property="IsEnabled" Value="False" />
                                                                                 <Setter Property="Opacity" Value="0.55" />
                                                                             </DataTrigger>
                                                                         </Style.Triggers>
