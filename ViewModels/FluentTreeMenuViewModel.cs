@@ -15,6 +15,8 @@ public class FluentTreeMenuViewModel : BaseViewModel, IDisposable
     public event Action<FluentTreeMenuList, bool> Swapped;
     public event Action<FluentTreeMenuBase?> ChangeSelectedItem;
 
+    public event Action<FluentTreeMenuBase>? ScrollToItemRequested;
+
     public FluentTreeMenuBase? SelectedItem
     {
         get => field;
@@ -53,6 +55,23 @@ public class FluentTreeMenuViewModel : BaseViewModel, IDisposable
     {
         Columns.CollectionChanged += Columns_CollectionChanged;
         Collections.CollectionChanged += Collections_CollectionChanged;
+    }
+
+    public void ScrollToItem(FluentTreeMenuBase item)
+    {
+        ScrollToItemRequested?.Invoke(item);
+    }
+
+    public void OpenAllParentTabs(FluentTreeMenuBase item)
+    {
+        OpenAllParentTabs(item.Parent, item);
+    }
+
+    private void OpenAllParentTabs(FluentTreeMenuList? item, FluentTreeMenuBase original)
+    {
+        if (item == null) return;
+        OpenAllParentTabs(item.Parent, original);
+        item.IsExpanded = true;
     }
 
 

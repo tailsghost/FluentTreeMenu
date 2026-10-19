@@ -7,6 +7,7 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Threading;
 using System.Xml.Linq;
 using Wpf.Ui.Controls;
 using MenuItem = System.Windows.Controls.MenuItem;
@@ -94,6 +95,29 @@ namespace FluentTreeMenu.Controls
             Loaded += FluentTreeMenuControl_Loaded;
             InitializeComponent();
             SizeChanged += OnSizeChanged;
+            ViewModel.ScrollToItemRequested += OnScrollToItemRequested;
+        }
+
+        private void OnScrollToItemRequested(FluentTreeMenuBase item)
+        {
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                var container = FindTreeViewItem(PART_TreeView, item);
+                if (container == null)
+                    return;
+
+                var position = container
+                    .TransformToAncestor(ScrollViewer)
+                    .Transform(new Point(0, 0));
+
+                double offset = ScrollViewer.VerticalOffset
+                                + position.Y
+                                - (ScrollViewer.ViewportHeight - container.ActualHeight) / 2;
+
+                ScrollViewer.ScrollToVerticalOffset(
+                    Math.Clamp(offset, 0, ScrollViewer.ScrollableHeight));
+
+            }), DispatcherPriority.Loaded);
         }
 
         private void SetPropertyChanged()
@@ -456,6 +480,7 @@ namespace FluentTreeMenu.Controls
             UpdateColumnWidths();
             FluentTreeMenuControl_Loaded(null, null);
             SizeChanged += OnSizeChanged;
+            ViewModel.ScrollToItemRequested += OnScrollToItemRequested;
         }
 
         private void OnColumnsCollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
@@ -562,6 +587,7 @@ namespace FluentTreeMenu.Controls
         {
             ViewModel.Columns.CollectionChanged -= OnColumnsCollectionChanged;
             RemovePropertyChanged();
+            ViewModel.ScrollToItemRequested -= OnScrollToItemRequested;
             ViewModel = null;
         }
 
@@ -705,6 +731,36 @@ namespace FluentTreeMenu.Controls
                 var result = FindChild<T>(child, name);
                 if (result != null)
                     return result;
+            }
+
+            return null;
+        }
+
+        private TreeViewItem? FindTreeViewItem(
+            ItemsControl parent,
+            object item)
+        {
+            parent.ApplyTemplate();
+            parent.UpdateLayout();
+
+            foreach (var data in parent.Items)
+            {
+                var container = parent.ItemContainerGenerator
+                    .ContainerFromItem(data) as TreeViewItem;
+
+                if (container == null)
+                    continue;
+
+                if (ReferenceEquals(data, item))
+                    return container;
+
+                if (container.IsExpanded)
+                {
+                    var result = FindTreeViewItem(container, item);
+
+                    if (result != null)
+                        return result;
+                }
             }
 
             return null;
