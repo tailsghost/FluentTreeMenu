@@ -213,7 +213,7 @@
                                                                                 <Binding Path="(ItemsControl.AlternationIndex)" RelativeSource="{RelativeSource AncestorType=ContentPresenter}" />
                                                                                 <Binding Path="Items.Count" RelativeSource="{RelativeSource AncestorType=ItemsControl}" />
                                                                                 <Binding Path="DataContext.IsLast" RelativeSource="{RelativeSource AncestorType=TreeViewItem}" />
-                                                                                <Binding Path="DataContext.HasChildren" RelativeSource="{RelativeSource AncestorType=TreeViewItem}" />
+                                                                                <Binding Path="HasItems" RelativeSource="{RelativeSource AncestorType=TreeViewItem}" />
                                                                                 <Binding Path="IsExpanded" RelativeSource="{RelativeSource AncestorType=TreeViewItem}" />
                                                                             </MultiBinding>
                                                                         </Border.Height>
@@ -257,7 +257,7 @@
                                                                 <Style TargetType="ToggleButton">
                                                                     <Setter Property="Visibility" Value="Collapsed" />
                                                                     <Style.Triggers>
-                                                                        <DataTrigger Binding="{Binding DataContext.HasChildren, RelativeSource={RelativeSource AncestorType=TreeViewItem}}" Value="True">
+                                                                        <DataTrigger Binding="{Binding HasItems, RelativeSource={RelativeSource AncestorType=TreeViewItem}}" Value="True">
                                                                             <Setter Property="Visibility" Value="Visible" />
                                                                         </DataTrigger>
                                                                     </Style.Triggers>
